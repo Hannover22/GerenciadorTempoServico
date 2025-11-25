@@ -57,6 +57,9 @@
             <label for="txtdesc">Data final: </label>
             <input type="date" id="datafinal" name="datafinal">
         </p>
+        <p>
+            <button type="submit" name="btnSubmit">Cadastrar</button>
+        </p>
     </form>
 </body>
 </html>
