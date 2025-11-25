@@ -2,16 +2,21 @@
     if(isset($_POST['txtnome']) && isset($_POST['txtprofissao'])){
         if(isset($_POST['txtsalario']) && is_numeric($_POST['txtsalario'])){
             if(null != ($_POST['datainicio']) && null != ($_POST('datafinal'))){
-                $nome = $_POST['txtnome'];
-                $profissao = $_POST['txtprofissao'];
-                $salario = $_POST['txtsalario'];
-                $datai = $_POST['datainicio'];
-                $dataf = $_POST['datafinal'];
-                $sql = "INSERT INTO tb_funcionarios VALUES(nome, profissao, salario, data_inicio, data_fim) VALUES(?,?,?,?,?)";
+                $nome = limpeza($_POST['txtnome']);
+                $profissao = limpeza($_POST['txtprofissao']);
+                $salario = limpeza($_POST['txtsalario']);
+                $datai = limpeza($_POST['datainicio']);
+                $datai = new DateTime($datai);
+                $dataf = limpeza($_POST['datafinal']);
+                $dataf = new DateTime($dataf);
+                $tempo = $datai->diff($dataf);
+                $sql = "INSERT INTO tb_funcionarios VALUES(nome, profissao, salario, data_inicio, data_fim, tempo) VALUES(?,?,?,?,?,?)";
                 $stmt = mysqli_prepare($con, $sql);
-                mysqli_stmt_bind_param($stmt, "sssss", $desc);
+                mysqli_stmt_bind_param($stmt, "ssdsss", $nome, $profissao, $salario, $datai, $dataf, $tempo);
                 mysqli_stmt_execute($stmt);
                 echo mysqli_stmt_affected_rows($stmt) . "Registros afetados";
+                //TODO:  Calcular o tempo que o funcionário está trabalhando
+                //TODO: Transformar o tempo em um gráfico entre os funcionarios cadastrados
             }
         }
         else{

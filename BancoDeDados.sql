@@ -12,3 +12,5 @@ CREATE TABLE tb_funcionarios(
 	data_inicio DATETIME NOT NULL,
 	data_final DATETIME NOT NULL
 );
+
+ALTER TABLE tb_funcionarios ADD tempo DATETIME NOT NULL;
