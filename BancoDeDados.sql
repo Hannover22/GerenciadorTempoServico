@@ -1,5 +1,3 @@
-//Roda isso aí no seu SQLyog para testar o programa
-
 CREATE DATABASE db_projeto;
 
 USE db_projeto;
@@ -13,4 +11,4 @@ CREATE TABLE tb_funcionarios(
 	data_final DATETIME NOT NULL
 );
 
-ALTER TABLE tb_funcionarios ADD tempo DATETIME NOT NULL;
+ALTER TABLE tb_funcionarios ADD tempo INT NOT NULL;

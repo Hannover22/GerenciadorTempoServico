@@ -1,23 +1,27 @@
-//TODO: Só falta conectar o $tempo e o $nome com o gráfico que está no "head"
-
 <?php
+    require "conecta.php";
     if(isset($_POST['txtnome']) && isset($_POST['txtprofissao'])){
         if(isset($_POST['txtsalario']) && is_numeric($_POST['txtsalario'])){
-            if(null != ($_POST['datainicio']) && null != ($_POST('datafinal'))){
+            if(null != ($_POST['datainicio']) && null != ($_POST['datafinal'])){
                 $nome = limpeza($_POST['txtnome']);
                 $profissao = limpeza($_POST['txtprofissao']);
                 $salario = limpeza($_POST['txtsalario']);
                 $datai = limpeza($_POST['datainicio']);
-                $datai = new DateTime($datai);
                 $dataf = limpeza($_POST['datafinal']);
+                $datai = new DateTime($datai);
                 $dataf = new DateTime($dataf);
-                $tempo = $datai->diff($dataf);
+                $diff = $datai->diff($dataf);
+                $tempo = $diff->days;
 
-                $sql = "INSERT INTO tb_funcionarios VALUES(nome, profissao, salario, data_inicio, data_fim, tempo) VALUES(?,?,?,?,?,?)";
+                $datai_mysql = $datai->format('Y-m-d H:i:s'); 
+                $dataf_mysql = $dataf->format('Y-m-d H:i:s');
+
+                $sql = "INSERT INTO tb_funcionarios (nome, profissao, salario, data_inicio, data_final, tempo) VALUES (?,?,?,?,?,?)";
                 $stmt = mysqli_prepare($con, $sql);
-                mysqli_stmt_bind_param($stmt, "ssdsss", $nome, $profissao, $salario, $datai, $dataf, $tempo);
+                
+                mysqli_stmt_bind_param($stmt, "ssdssi", $nome, $profissao, $salario, $datai_mysql, $dataf_mysql, $tempo);
                 mysqli_stmt_execute($stmt);
-                echo mysqli_stmt_affected_rows($stmt) . "Registros afetados";
+                echo mysqli_stmt_affected_rows($stmt) . " Registros afetados";
             }
         }
         else{
@@ -34,39 +38,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <script type="text/javascript">
+    <title>Trabalho Leo</title>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script>
     google.charts.load("current", {packages:["corechart"]});
     google.charts.setOnLoadCallback(drawChart);
+
     function drawChart() {
-      var data = google.visualization.arrayToDataTable([
-        ["Element", "Density", { role: "style" } ],
-        ["Copper", 8.94, "#b87333"],
-        ["Silver", 10.49, "silver"],
-        ["Gold", 19.30, "gold"],
-        ["Platinum", 21.45, "color: #e5e4e2"]
-      ]);
-
-      var view = new google.visualization.DataView(data);
-      view.setColumns([0, 1,
-                       { calc: "stringify",
-                         sourceColumn: 1,
-                         type: "string",
-                         role: "annotation" },
-                       2]);
-
+      var data = new google.visualization.DataTable();
+        data.addColumn('string', 'Nome');
+        data.addColumn('number', 'Tempo');
+        data.addColumn({type:'string', role:'style'});
+        data.addRows([
+        <?php
+            $result = mysqli_query($con, "SELECT nome, tempo FROM tb_funcionarios");
+            $i = 0;
+            while($row = $result->fetch_assoc()){
+                $colors = ["red","green","blue"];
+                $color = $colors[$i % count($colors)];
+                echo "['".$row['nome']."', ".$row['tempo'].", '$color'],";
+                $i++;
+            }
+        ?>
+        ]);
       var options = {
-        title: "Density of Precious Metals, in g/cm^3",
-        width: 600,
-        height: 400,
-        bar: {groupWidth: "95%"},
-        legend: { position: "none" },
+        title: "tempo de serviço em dias",
       };
-      var chart = new google.visualization.BarChart(document.getElementById("barchart_values"));
-      chart.draw(view, options);
+
+     var chart = new google.visualization.BarChart(document.getElementById("barchart_values"));
+     chart.draw(data, options);
+
   }
+
   </script>
-<div id="barchart_values" style="width: 900px; height: 300px;"></div>
 </head>
 <body>
     <form action="" method="post">
@@ -94,6 +98,6 @@
             <button type="submit" name="btnSubmit">Cadastrar</button>
         </p>
     </form>
-    <div id="chart_id"></div>
+    <div id="barchart_values" style="width: 900px; height: 400px;"></div>
 </body>
 </html>
