@@ -11,4 +11,14 @@
         $saida = htmlspecialchars($saida);
         return $saida;
     }
+
+    function totalFuncionarios($con){
+        $sql = "SELECT COUNT(*) AS total FROM tb_funcionarios";
+        $result = mysqli_query($con, $sql);
+        $row = mysqli_fetch_assoc($result);
+        return $row['total'];
+    }
+    
+    function limpar()
+    {}
 ?>

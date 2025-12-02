@@ -21,7 +21,8 @@
                 
                 mysqli_stmt_bind_param($stmt, "ssdssi", $nome, $profissao, $salario, $datai_mysql, $dataf_mysql, $tempo);
                 mysqli_stmt_execute($stmt);
-                echo mysqli_stmt_affected_rows($stmt) . " Registros afetados";
+                $total = totalFuncionarios($con);
+                echo "Total de funcionários cadastrados: " . $total;
             }
         }
         else{
@@ -31,6 +32,7 @@
     else{
         echo "Os campos de nome e profissão devem ser preenchido";
     }
+    
 ?>
 
 <!DOCTYPE html>
