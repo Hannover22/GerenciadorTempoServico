@@ -21,8 +21,20 @@ if(isset($_POST['txtnome']) && isset($_POST['txtprofissao'])){
                 $datafObj = new DateTime($dataf);
                 $diff = $dataiObj->diff($datafObj);
                 $tempo = $diff->days;
-                $faltas_clt = $_POST['lamspe'] + $_POST['f_medica'] + $_POST['a_medica'] + $_POST['f_medica_acompanhamento'] + $_POST['a_medica_acompanhamento'] + $_POST['l_saude'] + $_POST['int_particulares'] + $_POST['cargo_publico'] + $_POST['trat_familia'] + $_POST['p_suspensao'] + $_POST['justificada'] + $_POST['injustificada'];
-
+                $faltas_clt =
+                    intval($_POST['lamspe']) +
+                    intval($_POST['f_medica']) +
+                    intval($_POST['a_medica']) +
+                    intval($_POST['f_medica_acompanhamento']) +
+                    intval($_POST['a_medica_acompanhamento']) +
+                    intval($_POST['l_saude']) +
+                    intval($_POST['int_particulares']) +
+                    intval($_POST['cargo_publico']) +
+                    intval($_POST['trat_familia']) +
+                    intval($_POST['p_suspensao']) +
+                    intval($_POST['justificada']) +
+                    intval($_POST['injustificada']);
+                
                 $tempo = $tempo - $faltas_clt;
 
                 $datai_mysql = $dataiObj->format('Y-m-d H:i:s'); 
@@ -52,8 +64,20 @@ if(isset($_POST['txtnome']) && isset($_POST['txtprofissao'])){
                 $diff = $dataiObj->diff($datafObj);
                 $tempo = $diff->days;
 
-                $faltas_aut = $_POST['a_medico2'] + $_POST['l_saude2'] + $_POST['lc_saude3'] + $_POST['int_particulares2'] + $_POST['mandato_publico'] + $_POST['af_salarios'] + $_POST['pen_suspensao2'] + $_POST['justificada2'] + $_POST['justificada_comdesconto'] + $_POST['deliberacao'] + $_POST['justificadas2'];
-
+                $faltas_aut =
+                    intval($_POST['a_medico2']) +
+                    intval($_POST['l_saude2']) +
+                    intval($_POST['lc_saude3']) +
+                    intval($_POST['int_particulares2']) +
+                    intval($_POST['mandato_publico']) +
+                    intval($_POST['af_salarios']) +
+                    intval($_POST['pen_suspensao2']) +
+                    intval($_POST['justificada2']) +
+                    intval($_POST['justificada_comdesconto']) +
+                    intval($_POST['deliberacao']) +
+                    intval($_POST['justificadas2']);
+                
+                $tempo = $tempo - $faltas_aut;
                 $datai_mysql = $dataiObj->format('Y-m-d H:i:s'); 
                 $dataf_mysql = $datafObj->format('Y-m-d H:i:s');
 
