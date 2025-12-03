@@ -1,28 +1,68 @@
 <?php
-    require "conecta.php";
-    if(isset($_POST['txtnome']) && isset($_POST['txtprofissao'])){
-        if(isset($_POST['txtsalario']) && is_numeric($_POST['txtsalario'])){
-            if(null != ($_POST['datainicio']) && null != ($_POST['datafinal'])){
+require "conecta.php";
+
+
+if(isset($_POST['txtnome']) && isset($_POST['txtprofissao'])){
+        
+    if(isset($_POST['txtsalario']) && is_numeric($_POST['txtsalario'])){
+            
+        if(!empty($_POST['datainicio']) && !empty($_POST['datafinal'])){
+
+            if(!empty($_POST['chkA'])){
+                
                 $nome = limpeza($_POST['txtnome']);
                 $profissao = limpeza($_POST['txtprofissao']);
                 $salario = limpeza($_POST['txtsalario']);
                 $datai = limpeza($_POST['datainicio']);
                 $dataf = limpeza($_POST['datafinal']);
-                $datai = new DateTime($datai);
-                $dataf = new DateTime($dataf);
-                $diff = $datai->diff($dataf);
+
+                $dataiObj = new DateTime($datai);
+                $datafObj = new DateTime($dataf);
+                $diff = $dataiObj->diff($datafObj);
                 $tempo = $diff->days;
+                $faltas_clt = $_POST['lamspe'] + $_POST['f_medica'] + $_POST['a_medica'] + $_POST['f_medica_acompanhamento'] + $_POST['a_medica_Acompanhamento'] + $_POST['l_saude'] + $_POST['int_particulares'] + $_POST['cargo_publico'] + $_POST['trat_familia'] + $_POST['p_suspensao'] + $_POST['justificada'] + $_POST['injustificada'];
 
-                $datai_mysql = $datai->format('Y-m-d H:i:s'); 
-                $dataf_mysql = $dataf->format('Y-m-d H:i:s');
+                $tempo = $tempo - $faltas_clt;
 
-                $sql = "INSERT INTO tb_funcionarios (nome, profissao, salario, data_inicio, data_final, tempo) VALUES (?,?,?,?,?,?)";
+                $datai_mysql = $dataiObj->format('Y-m-d H:i:s'); 
+                $dataf_mysql = $datafObj->format('Y-m-d H:i:s');
+
+                $sql = "INSERT INTO tb_funcionarios_clt (nome, profissao, salario, data_inicio, data_final, tempo) VALUES (?,?,?,?,?,?)";
                 $stmt = mysqli_prepare($con, $sql);
-                
+                    
                 mysqli_stmt_bind_param($stmt, "ssdssi", $nome, $profissao, $salario, $datai_mysql, $dataf_mysql, $tempo);
                 mysqli_stmt_execute($stmt);
-                $total = totalFuncionarios($con);
-                echo "Total de funcionários cadastrados: " . $total;
+
+                // EVITAR DUPLICAÇÃO AO ATUALIZAR A PÁGINA
+                header("Location: ".$_SERVER['PHP_SELF']."?ok=1");
+                exit;
+            }
+            else if(!empty($_POST['chkB'])){
+
+                $nome = limpeza($_POST['txtnome']);
+                $profissao = limpeza($_POST['txtprofissao']);
+                $salario = limpeza($_POST['txtsalario']);
+                $datai = limpeza($_POST['datainicio']);
+                $dataf = limpeza($_POST['datafinal']);
+
+                $dataiObj = new DateTime($datai);
+                $datafObj = new DateTime($dataf);
+                $diff = $dataiObj->diff($datafObj);
+                $tempo = $diff->days;
+
+                $faltas_aut = $_POST['a_medico2'] + $_POST['l_saude2'] + $_POST['lc_saude3'] + $_POST['int_particulares2'] + $_POST['mandato_publico'] + $_POST['af_salarios'] + $_POST['pen_suspensao2'] + $_POST['justificada2'] + $_POST['justificada_comdesconto'] + $_POST['deliberacao'] + $_POST['justificadas2'] +
+
+                $datai_mysql = $dataiObj->format('Y-m-d H:i:s'); 
+                $dataf_mysql = $datafObj->format('Y-m-d H:i:s');
+
+                $sql2 = "INSERT INTO tb_funcionario_autarquico (nome, profissao, salario, data_inicio, data_final, tempo) VALUES (?,?,?,?,?,?)";
+                $stmt = mysqli_prepare($con, $sql);
+                    
+                mysqli_stmt_bind_param($stmt, "ssdssi", $nome, $profissao, $salario, $datai_mysql, $dataf_mysql, $tempo);
+                mysqli_stmt_execute($stmt);
+            }
+            else{
+                echo "Selecione se o funcionario é CLT ou de Autarquia";
             }
         }
     } else {
@@ -197,6 +237,93 @@
         <button type="submit">Enviar</button>
     </p>
     </form>
+
+    <div id="groupB" class="hidden group">
+        <p>
+            <label>Abonadas:</label>
+            <input type="number" name="abonadas2" min="0" max="10000">
+        </p>
+        <p>
+            <label>Atestado médico (Até 12/08/2010):</label>
+            <input type="number" name="a_medico2" min="0" max="10000">
+        </p>
+        <p>
+            <label>Licença saúde (Até 12/08/2010):</label>
+            <input type="number" name="l_saude2" min="0" max="10000">
+        </p>
+        <p>
+            <label>Licença saúde (A partir de 13/08/2010):</label>
+            <input type="number" name="lc_saude3" min="0" max="10000">
+        </p>
+        <p>
+            <label>Licença para tratar de interesses particulares:</label>
+            <input type="number" name="int_particulares2" min="0" max="10000">
+        </p>
+        <p>
+            <label>Afastamento para concorrer a cargo publico(eleições):</label>
+            <input type="number" name="cargo_publico2" min="0" max="10000">
+        </p>
+        <p>
+            <label>Afastamento para concorrer a cargo público(mandato):</label>
+            <input type="number" name="mandato_publico" min="0" max="10000">
+        </p>
+        <p>
+            <label>Afastamento com prejuízo de salarios:</label>
+            <input type="number" name="af_salarios" min="0" max="10000">
+        </p>
+        <p>
+            <label>Penalidade de suspensão:</label>
+            <input type="number" name="pen_suspensao2" min="0" max="10000">
+        </p>
+        <p>
+            <label>Penalidade de repreensão:</label>
+            <input type="number" name="pen_repreensao2" min="0" max="10000">
+        </p>
+        <p>
+            <label>Justificada(Até 12/08/2010):</label>
+            <input type="number" name="justificada2" min="0" max="10000">
+        </p>
+        <p>
+            <label>Justificada (A partir de 13/08/2010 com desconto em folha de pagamento):</label>
+            <input type="number" name="justificada_comdesconto" min="0" max="10000">
+        </p>
+        <p>
+            <label>Justificada (A partir de 13/08/2010 sem desconto em folha de pagamento):</label>
+            <input type="number" name="justificada_semdesconto" min="0" max="10000">
+        </p>
+        <p>
+            <label>Falta dia nº 05/2010:</label>
+            <input type="number" name="deliberacao" min="0" max="10000">
+        </p>
+        <p>
+            <label>Justificadas:</label>
+            <input type="number" name="justificadas2" min="0" max="10000">
+        </p>
+
     <div id="barchart_values" style="width: 900px; height: 400px;"></div>
+
+    <script>
+    document.getElementById("btnAdd").addEventListener("click", function() {
+
+        const chkA = document.getElementById("chkA").checked;
+        const chkB = document.getElementById("chkB").checked;
+
+        // Grupo A
+        if (chkA) {
+            document.getElementById("groupA").classList.remove("hidden");
+        } else {
+            document.getElementById("groupA").classList.add("hidden");
+        }
+
+        // Grupo B
+        if (chkB) {
+            document.getElementById("groupB").classList.remove("hidden");
+        } else {
+            document.getElementById("groupB").classList.add("hidden");
+        }
+
+    });
+    </script>
+
 </body>
 </html>
