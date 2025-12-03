@@ -15,22 +15,23 @@ if(isset($_POST['txtnome']) && isset($_POST['txtprofissao'])){
                 $salario = limpeza($_POST['txtsalario']);
                 $datai = limpeza($_POST['datainicio']);
                 $dataf = limpeza($_POST['datafinal']);
+                $clt = "CLT";
 
                 $dataiObj = new DateTime($datai);
                 $datafObj = new DateTime($dataf);
                 $diff = $dataiObj->diff($datafObj);
                 $tempo = $diff->days;
-                $faltas_clt = $_POST['lamspe'] + $_POST['f_medica'] + $_POST['a_medica'] + $_POST['f_medica_acompanhamento'] + $_POST['a_medica_Acompanhamento'] + $_POST['l_saude'] + $_POST['int_particulares'] + $_POST['cargo_publico'] + $_POST['trat_familia'] + $_POST['p_suspensao'] + $_POST['justificada'] + $_POST['injustificada'];
+                $faltas_clt = $_POST['lamspe'] + $_POST['f_medica'] + $_POST['a_medica'] + $_POST['f_medica_acompanhamento'] + $_POST['a_medica_acompanhamento'] + $_POST['l_saude'] + $_POST['int_particulares'] + $_POST['cargo_publico'] + $_POST['trat_familia'] + $_POST['p_suspensao'] + $_POST['justificada'] + $_POST['injustificada'];
 
                 $tempo = $tempo - $faltas_clt;
 
                 $datai_mysql = $dataiObj->format('Y-m-d H:i:s'); 
                 $dataf_mysql = $datafObj->format('Y-m-d H:i:s');
 
-                $sql = "INSERT INTO tb_funcionarios_clt (nome, profissao, salario, data_inicio, data_final, tempo) VALUES (?,?,?,?,?,?)";
+                $sql = "INSERT INTO tb_funcionarios (nome, profissao, salario, clt, data_inicio, data_final, tempo) VALUES (?,?,?,?,?,?,?)";
                 $stmt = mysqli_prepare($con, $sql);
                     
-                mysqli_stmt_bind_param($stmt, "ssdssi", $nome, $profissao, $salario, $datai_mysql, $dataf_mysql, $tempo);
+                mysqli_stmt_bind_param($stmt, "ssdsssi", $nome, $profissao, $salario, $clt, $datai_mysql, $dataf_mysql, $tempo);
                 mysqli_stmt_execute($stmt);
 
                 // EVITAR DUPLICAÇÃO AO ATUALIZAR A PÁGINA
@@ -44,21 +45,22 @@ if(isset($_POST['txtnome']) && isset($_POST['txtprofissao'])){
                 $salario = limpeza($_POST['txtsalario']);
                 $datai = limpeza($_POST['datainicio']);
                 $dataf = limpeza($_POST['datafinal']);
+                $clt = "autarquico";
 
                 $dataiObj = new DateTime($datai);
                 $datafObj = new DateTime($dataf);
                 $diff = $dataiObj->diff($datafObj);
                 $tempo = $diff->days;
 
-                $faltas_aut = $_POST['a_medico2'] + $_POST['l_saude2'] + $_POST['lc_saude3'] + $_POST['int_particulares2'] + $_POST['mandato_publico'] + $_POST['af_salarios'] + $_POST['pen_suspensao2'] + $_POST['justificada2'] + $_POST['justificada_comdesconto'] + $_POST['deliberacao'] + $_POST['justificadas2'] +
+                $faltas_aut = $_POST['a_medico2'] + $_POST['l_saude2'] + $_POST['lc_saude3'] + $_POST['int_particulares2'] + $_POST['mandato_publico'] + $_POST['af_salarios'] + $_POST['pen_suspensao2'] + $_POST['justificada2'] + $_POST['justificada_comdesconto'] + $_POST['deliberacao'] + $_POST['justificadas2'];
 
                 $datai_mysql = $dataiObj->format('Y-m-d H:i:s'); 
                 $dataf_mysql = $datafObj->format('Y-m-d H:i:s');
 
-                $sql2 = "INSERT INTO tb_funcionario_autarquico (nome, profissao, salario, data_inicio, data_final, tempo) VALUES (?,?,?,?,?,?)";
-                $stmt = mysqli_prepare($con, $sql);
+                $sql2 = "INSERT INTO tb_funcionarios (nome, profissao, salario, clt, data_inicio, data_final, tempo) VALUES (?,?,?,?,?,?,?)";
+                $stmt = mysqli_prepare($con, $sql2);
                     
-                mysqli_stmt_bind_param($stmt, "ssdssi", $nome, $profissao, $salario, $datai_mysql, $dataf_mysql, $tempo);
+                mysqli_stmt_bind_param($stmt, "ssdsssi", $nome, $profissao, $salario, $clt, $datai_mysql, $dataf_mysql, $tempo);
                 mysqli_stmt_execute($stmt);
             }
             else{
@@ -148,12 +150,12 @@ if(isset($_POST['txtnome']) && isset($_POST['txtprofissao'])){
         </p>
         <div>
             <label class="checkbox-group">
-                <input type="checkbox" id="chkA">
+                <input type="checkbox" id="chkA" name="chkA" value="1">
                 Funcionário CLT
             </label>
 
             <label class="checkbox-group">
-                <input type="checkbox" id="chkB">
+                <input type="checkbox" id="chkB" name="chkB" value="1">
                 Funcionário Autárquico
             </label>
         </div>
@@ -236,7 +238,6 @@ if(isset($_POST['txtnome']) && isset($_POST['txtprofissao'])){
     <p>
         <button type="submit">Enviar</button>
     </p>
-    </form>
 
     <div id="groupB" class="hidden group">
         <p>
@@ -299,6 +300,8 @@ if(isset($_POST['txtnome']) && isset($_POST['txtprofissao'])){
             <label>Justificadas:</label>
             <input type="number" name="justificadas2" min="0" max="10000">
         </p>
+    </div>
+    </form>
 
     <div id="barchart_values" style="width: 900px; height: 400px;"></div>
 
