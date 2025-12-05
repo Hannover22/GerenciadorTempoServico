@@ -1,111 +1,113 @@
 <?php
 session_start();
+require_once "conecta.php";
 
+// se não estiver logado → volta para login
 if (!isset($_SESSION['tipo'])) {
-    header("Location: login.php");
+    include "login.php";
     exit;
 }
 
-require "conecta.php";
+// se for usuário comum → ele só vê o gráfico
+$acessoAdmin = ($_SESSION['tipo'] === "admin");
 
-
-if(isset($_POST['txtnome']) && isset($_POST['txtprofissao'])){
-        
-    if(isset($_POST['txtsalario']) && is_numeric($_POST['txtsalario'])){
+if($acessoAdmin){
+    if(isset($_POST['txtnome']) && isset($_POST['txtprofissao'])){
             
-        if(!empty($_POST['datainicio']) && !empty($_POST['datafinal'])){
-
-            if(!empty($_POST['chkA'])){
+        if(isset($_POST['txtsalario']) && is_numeric($_POST['txtsalario'])){
                 
-                $nome = limpeza($_POST['txtnome']);
-                $profissao = limpeza($_POST['txtprofissao']);
-                $salario = limpeza($_POST['txtsalario']);
-                $datai = limpeza($_POST['datainicio']);
-                $dataf = limpeza($_POST['datafinal']);
-                $clt = "CLT";
+            if(!empty($_POST['datainicio']) && !empty($_POST['datafinal'])){
 
-                $dataiObj = new DateTime($datai);
-                $datafObj = new DateTime($dataf);
-                $diff = $dataiObj->diff($datafObj);
-                $tempo = $diff->days;
-                $faltas_clt =
-                    intval($_POST['lamspe']) +
-                    intval($_POST['f_medica']) +
-                    intval($_POST['a_medica']) +
-                    intval($_POST['f_medica_acompanhamento']) +
-                    intval($_POST['a_medica_acompanhamento']) +
-                    intval($_POST['l_saude']) +
-                    intval($_POST['int_particulares']) +
-                    intval($_POST['cargo_publico']) +
-                    intval($_POST['trat_familia']) +
-                    intval($_POST['p_suspensao']) +
-                    intval($_POST['justificada']) +
-                    intval($_POST['injustificada']);
-                
-                $tempo = $tempo - $faltas_clt;
-
-                $datai_mysql = $dataiObj->format('Y-m-d H:i:s'); 
-                $dataf_mysql = $datafObj->format('Y-m-d H:i:s');
-
-                $sql = "INSERT INTO tb_funcionarios (nome, profissao, salario, clt, data_inicio, data_final, tempo) VALUES (?,?,?,?,?,?,?)";
-                $stmt = mysqli_prepare($con, $sql);
+                if(!empty($_POST['chkA'])){
                     
-                mysqli_stmt_bind_param($stmt, "ssdsssi", $nome, $profissao, $salario, $clt, $datai_mysql, $dataf_mysql, $tempo);
-                mysqli_stmt_execute($stmt);
+                    $nome = limpeza($_POST['txtnome']);
+                    $profissao = limpeza($_POST['txtprofissao']);
+                    $salario = limpeza($_POST['txtsalario']);
+                    $datai = limpeza($_POST['datainicio']);
+                    $dataf = limpeza($_POST['datafinal']);
+                    $clt = "CLT";
 
-                // EVITAR DUPLICAÇÃO AO ATUALIZAR A PÁGINA
-                header("Location: ".$_SERVER['PHP_SELF']."?ok=1");
-                exit;
-            }
-            else if(!empty($_POST['chkB'])){
-
-                $nome = limpeza($_POST['txtnome']);
-                $profissao = limpeza($_POST['txtprofissao']);
-                $salario = limpeza($_POST['txtsalario']);
-                $datai = limpeza($_POST['datainicio']);
-                $dataf = limpeza($_POST['datafinal']);
-                $clt = "autarquico";
-
-                $dataiObj = new DateTime($datai);
-                $datafObj = new DateTime($dataf);
-                $diff = $dataiObj->diff($datafObj);
-                $tempo = $diff->days;
-
-                $faltas_aut =
-                    intval($_POST['a_medico2']) +
-                    intval($_POST['l_saude2']) +
-                    intval($_POST['lc_saude3']) +
-                    intval($_POST['int_particulares2']) +
-                    intval($_POST['mandato_publico']) +
-                    intval($_POST['af_salarios']) +
-                    intval($_POST['pen_suspensao2']) +
-                    intval($_POST['justificada2']) +
-                    intval($_POST['justificada_comdesconto']) +
-                    intval($_POST['deliberacao']) +
-                    intval($_POST['justificadas2']);
-                
-                $tempo = $tempo - $faltas_aut;
-                $datai_mysql = $dataiObj->format('Y-m-d H:i:s'); 
-                $dataf_mysql = $datafObj->format('Y-m-d H:i:s');
-
-                $sql2 = "INSERT INTO tb_funcionarios (nome, profissao, salario, clt, data_inicio, data_final, tempo) VALUES (?,?,?,?,?,?,?)";
-                $stmt = mysqli_prepare($con, $sql2);
+                    $dataiObj = new DateTime($datai);
+                    $datafObj = new DateTime($dataf);
+                    $diff = $dataiObj->diff($datafObj);
+                    $tempo = $diff->days;
+                    $faltas_clt =
+                        intval($_POST['lamspe']) +
+                        intval($_POST['f_medica']) +
+                        intval($_POST['a_medica']) +
+                        intval($_POST['f_medica_acompanhamento']) +
+                        intval($_POST['a_medica_acompanhamento']) +
+                        intval($_POST['l_saude']) +
+                        intval($_POST['int_particulares']) +
+                        intval($_POST['cargo_publico']) +
+                        intval($_POST['trat_familia']) +
+                        intval($_POST['p_suspensao']) +
+                        intval($_POST['justificada']) +
+                        intval($_POST['injustificada']);
                     
-                mysqli_stmt_bind_param($stmt, "ssdsssi", $nome, $profissao, $salario, $clt, $datai_mysql, $dataf_mysql, $tempo);
-                mysqli_stmt_execute($stmt);
+                    $tempo = $tempo - $faltas_clt;
+
+                    $datai_mysql = $dataiObj->format('Y-m-d H:i:s'); 
+                    $dataf_mysql = $datafObj->format('Y-m-d H:i:s');
+
+                    $sql = "INSERT INTO tb_funcionarios (nome, profissao, salario, clt, data_inicio, data_final, tempo) VALUES (?,?,?,?,?,?,?)";
+                    $stmt = mysqli_prepare($con, $sql);
+                        
+                    mysqli_stmt_bind_param($stmt, "ssdsssi", $nome, $profissao, $salario, $clt, $datai_mysql, $dataf_mysql, $tempo);
+                    mysqli_stmt_execute($stmt);
+
+                    // EVITAR DUPLICAÇÃO AO ATUALIZAR A PÁGINA
+                    header("Location: ".$_SERVER['PHP_SELF']."?ok=1");
+                    exit;
+                }
+                else if(!empty($_POST['chkB'])){
+
+                    $nome = limpeza($_POST['txtnome']);
+                    $profissao = limpeza($_POST['txtprofissao']);
+                    $salario = limpeza($_POST['txtsalario']);
+                    $datai = limpeza($_POST['datainicio']);
+                    $dataf = limpeza($_POST['datafinal']);
+                    $clt = "autarquico";
+
+                    $dataiObj = new DateTime($datai);
+                    $datafObj = new DateTime($dataf);
+                    $diff = $dataiObj->diff($datafObj);
+                    $tempo = $diff->days;
+
+                    $faltas_aut =
+                        intval($_POST['a_medico2']) +
+                        intval($_POST['l_saude2']) +
+                        intval($_POST['lc_saude3']) +
+                        intval($_POST['int_particulares2']) +
+                        intval($_POST['mandato_publico']) +
+                        intval($_POST['af_salarios']) +
+                        intval($_POST['pen_suspensao2']) +
+                        intval($_POST['justificada2']) +
+                        intval($_POST['justificada_comdesconto']) +
+                        intval($_POST['deliberacao']) +
+                        intval($_POST['justificadas2']);
+                    
+                    $tempo = $tempo - $faltas_aut;
+                    $datai_mysql = $dataiObj->format('Y-m-d H:i:s'); 
+                    $dataf_mysql = $datafObj->format('Y-m-d H:i:s');
+
+                    $sql2 = "INSERT INTO tb_funcionarios (nome, profissao, salario, clt, data_inicio, data_final, tempo) VALUES (?,?,?,?,?,?,?)";
+                    $stmt = mysqli_prepare($con, $sql2);
+                        
+                    mysqli_stmt_bind_param($stmt, "ssdsssi", $nome, $profissao, $salario, $clt, $datai_mysql, $dataf_mysql, $tempo);
+                    mysqli_stmt_execute($stmt);
+                }
+                else{
+                    echo "Selecione se o funcionario é CLT ou de Autarquia";
+                }
             }
-            else{
-                echo "Selecione se o funcionario é CLT ou de Autarquia";
-            }
+        } else {
+                echo "O campo salário deve ser preenchido e numérico";
         }
     } else {
-            echo "O campo salário deve ser preenchido e numérico";
+        echo "Os campos de nome e profissão devem ser preenchido";
     }
-} else {
-    echo "Os campos de nome e profissão devem ser preenchido";
 }
-
-
 ?>
 
 <!DOCTYPE html>
@@ -165,7 +167,7 @@ if(isset($_POST['txtnome']) && isset($_POST['txtprofissao'])){
         <br>Total de funcionários: <?php echo totalFuncionarios($con); ?>
     </p>
 <?php endif; ?>
-<?php if ($_SESSION['tipo'] === "admin"): ?>
+<?php if ($acessoAdmin): ?>
     <form action="" method="post">
         <p>
             <label>Nome do funcionario: </label>
@@ -334,7 +336,9 @@ if(isset($_POST['txtnome']) && isset($_POST['txtprofissao'])){
     </p>
     </form>
 <?php endif; ?>
+<?php if($_SESSION['tipo'] == "membro comum"): ?>
     <div id="barchart_values" style="width: 900px; height: 400px;"></div>
+<?php endif; ?>
 
     <script>
     document.getElementById("btnAdd").addEventListener("click", function() {

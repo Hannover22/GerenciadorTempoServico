@@ -1,5 +1,5 @@
 <?php
-require "conecta.php";
+require_once "conecta.php";
 
 
 
