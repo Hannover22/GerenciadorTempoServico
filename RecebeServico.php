@@ -1,4 +1,11 @@
 <?php
+session_start();
+
+if (!isset($_SESSION['tipo'])) {
+    header("Location: login.php");
+    exit;
+}
+
 require "conecta.php";
 
 
@@ -158,7 +165,7 @@ if(isset($_POST['txtnome']) && isset($_POST['txtprofissao'])){
         <br>Total de funcionários: <?php echo totalFuncionarios($con); ?>
     </p>
 <?php endif; ?>
-
+<?php if ($_SESSION['tipo'] === "admin"): ?>
     <form action="" method="post">
         <p>
             <label>Nome do funcionario: </label>
@@ -190,9 +197,6 @@ if(isset($_POST['txtnome']) && isset($_POST['txtprofissao'])){
         <p>
             <label>Data final: </label>
             <input type="date" id="datafinal" name="datafinal">
-        </p>
-        <p>
-            <button type="submit" name="btnSubmit">Cadastrar</button>
         </p>
 
     <button type="button" id="btnAdd">Cadastrar faltas:</button>
@@ -325,8 +329,11 @@ if(isset($_POST['txtnome']) && isset($_POST['txtprofissao'])){
             <input type="number" name="justificadas2" min="0" max="10000">
         </p>
     </div>
+    <p>
+        <button type="submit" name="btnSubmit">Cadastrar</button>
+    </p>
     </form>
-
+<?php endif; ?>
     <div id="barchart_values" style="width: 900px; height: 400px;"></div>
 
     <script>
