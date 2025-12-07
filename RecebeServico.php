@@ -18,7 +18,7 @@ if($acessoAdmin){
                 
             if(!empty($_POST['datainicio']) && !empty($_POST['datafinal'])){
 
-                if(!empty($_POST['chkA'])){
+                if($_POST['chk'] == 'a'){
                     
                     $nome = limpeza($_POST['txtnome']);
                     $profissao = limpeza($_POST['txtprofissao']);
@@ -60,7 +60,7 @@ if($acessoAdmin){
                     header("Location: ".$_SERVER['PHP_SELF']."?ok=1");
                     exit;
                 }
-                else if(!empty($_POST['chkB'])){
+                else if($_POST['chk'] == 'b'){
 
                     $nome = limpeza($_POST['txtnome']);
                     $profissao = limpeza($_POST['txtprofissao']);
