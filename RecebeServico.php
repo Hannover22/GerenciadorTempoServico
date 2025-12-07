@@ -1,10 +1,10 @@
 <?php
-session_start();
 require_once "conecta.php";
+include "login.php";
 
 // se não estiver logado → volta para login
 if (!isset($_SESSION['tipo'])) {
-    include "login.php";
+    header('locale:login.php');
     exit;
 }
 
