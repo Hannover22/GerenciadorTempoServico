@@ -117,7 +117,7 @@ if($acessoAdmin){
         .hidden { display: none; }
         .group { margin-top: 10px; }
         
-        .checkbox-group {
+        .radio-group {
         display: inline-block;
         margin-right: 20px;
         }
@@ -181,15 +181,11 @@ if($acessoAdmin){
             <label>Salario: </label>
             <input type="text" id="txtsalario" name="txtsalario">
         </p>
-        <div>
-            <label class="checkbox-group">
-                <input type="checkbox" id="chkA" name="chkA" value="1">
-                Funcionário CLT
-            </label>
-
-            <label class="checkbox-group">
-                <input type="checkbox" id="chkB" name="chkB" value="1">
-                Funcionário Autárquico
+        <div class="radio-group">
+                <input type="radio" id="chkA" name="chk" value="a">
+                <label for="chkA">Funcionário CLT</label>
+                <input type="radio" id="chkB" name="chk" value="b">
+                <label for="chkB">Funcionário Autárquico</label>
             </label>
         </div>
         <p>
@@ -264,10 +260,6 @@ if($acessoAdmin){
         </p>
 
     </div>
-
-    <p>
-        <button type="submit">Enviar</button>
-    </p>
 
     <div id="groupB" class="hidden group">
         <p>
