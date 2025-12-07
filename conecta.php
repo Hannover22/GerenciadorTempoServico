@@ -12,6 +12,14 @@
         return $saida;
     }
 
+    function registrarSenhaHash($senhaPura) {
+    return password_hash($senhaPura, PASSWORD_DEFAULT);
+    }
+
+    function validarSenhaHash($senhaDigitada, $senhaHashBanco) {
+        return password_verify($senhaDigitada, $senhaHashBanco);
+    }
+
     function totalFuncionarios($con){
         $sql = "SELECT COUNT(*) AS total FROM tb_funcionarios";
         $result = mysqli_query($con, $sql);
@@ -19,6 +27,4 @@
         return $row['total'];
     }
     
-    function limpar()
-    {}
 ?>
