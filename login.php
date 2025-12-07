@@ -16,14 +16,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['btnLogin'])) {
         header("Location: login.php?error=" . urlencode("Preencha usuário e senha."));
         exit;
     }
-
-    // Login Admin fixo
-    if ($user === "Admin" && $pass === "123") {
-        $_SESSION['tipo'] = "admin";
-        header("Location: RecebeServico.php");
-        exit;
-    }
-
+    
     // Login usuários do banco
     $sql = "SELECT nome, senha, cargo FROM tb_usuarios WHERE nome = ? LIMIT 1";
     $stmt = mysqli_prepare($con, $sql);
@@ -33,7 +26,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['btnLogin'])) {
 
     if ($row = mysqli_fetch_assoc($result)) {
 
-        if ($pass === $row['senha']) {
+        if (validarSenhaHash($pass, $row['senha'])) {
             session_regenerate_id(true);
             $_SESSION['tipo'] = $row['cargo'];
             $_SESSION['usuario'] = $row['nome'];
@@ -71,10 +64,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['btnFinalizarCadastro'
         }
 
         $cargo = "membro comum";
+
+        $hash = registrarSenhaHash($senha2);
+
         $sql = "INSERT INTO tb_usuarios (nome, senha, cargo) VALUES (?,?,?)";
         $stmt = mysqli_prepare($con, $sql);
-        mysqli_stmt_bind_param($stmt, "sss", $user2, $senha2, $cargo);
+        mysqli_stmt_bind_param($stmt, "sss", $user2, $hash, $cargo);
         mysqli_stmt_execute($stmt);
+
 
         header("Location: login.php?ok=" . urlencode("Usuário cadastrado com sucesso!"));
         exit;
