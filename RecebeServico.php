@@ -105,7 +105,7 @@ if($acessoAdmin){
                 echo "O campo salário deve ser preenchido e numérico";
         }
     } else {
-        echo "Os campos de nome e profissão devem ser preenchido";
+        echo "";
     }
 }
 ?>
@@ -334,10 +334,17 @@ if($acessoAdmin){
     <p>
         <button type="submit" name="btnSubmit">Cadastrar</button>
     </p>
+    <div id="barchart_values" style="width: 900px; height: 400px;"></div>
+    </form>
+    <form action="logout.php" method="post">
+        <button type="submit">Logout</button>
     </form>
 <?php endif; ?>
 <?php if($_SESSION['tipo'] == "membro comum"): ?>
     <div id="barchart_values" style="width: 900px; height: 400px;"></div>
+    <form action="logout.php" method="post">
+        <button type="submit">Logout</button>
+    </form>
 <?php endif; ?>
 
     <script>

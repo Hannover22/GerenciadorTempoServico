@@ -4,6 +4,7 @@ require_once "conecta.php"; // contém a função limpeza()
 
 $erro = isset($_GET['error']) ? $_GET['error'] : "";
 $ok = isset($_GET['ok']) ? $_GET['ok'] : "";
+$logado = isset($_SESSION['tipo']);
 
 // Login
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['btnLogin'])) {
@@ -98,42 +99,44 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['btnFinalizarCadastro'
 </head>
 <body>
 
-<h2>Login</h2>
+<?php if (!$logado): ?>
+    <h2>Login</h2>
 
-<?php if ($erro): ?>
-    <p class="msg"><?= $erro ?></p>
-<?php endif; ?>
+    <?php if ($erro): ?>
+        <p class="msg"><?= $erro ?></p>
+    <?php endif; ?>
 
-<?php if ($ok): ?>
-    <p class="ok"><?= $ok ?></p>
-<?php endif; ?>
+    <?php if ($ok): ?>
+        <p class="ok"><?= $ok ?></p>
+    <?php endif; ?>
 
-<form method="post">
+    <form method="post">
 
-    <label>Usuário:</label>
-    <input type="text" name="usuario"><br><br>
-
-    <label>Senha:</label>
-    <input type="password" name="senha"><br><br>
-
-    <button type="submit" name="btnLogin">Entrar</button>
-    <button type="button" id="btnCadastrar">Criar Conta</button>
-
-    <div id="Cadastro" class="hidden">
-        <br><hr><br>
-
-        <label>Novo usuário:</label>
-        <input type="text" name="usuario2"><br><br>
+        <label>Usuário:</label>
+        <input type="text" name="usuario"><br><br>
 
         <label>Senha:</label>
-        <input type="password" name="senha2"><br><br>
+        <input type="password" name="senha"><br><br>
 
-        <label>Repita a senha:</label>
-        <input type="password" name="confirmasenha2"><br><br>
+        <button type="submit" name="btnLogin">Entrar</button>
+        <button type="button" id="btnCadastrar">Criar Conta</button>
 
-        <button type="submit" name="btnFinalizarCadastro">Finalizar Cadastro</button>
-    </div>
-</form>
+        <div id="Cadastro" class="hidden">
+            <br><hr><br>
+
+            <label>Novo usuário:</label>
+            <input type="text" name="usuario2"><br><br>
+
+            <label>Senha:</label>
+            <input type="password" name="senha2"><br><br>
+
+            <label>Repita a senha:</label>
+            <input type="password" name="confirmasenha2"><br><br>
+
+            <button type="submit" name="btnFinalizarCadastro">Finalizar Cadastro</button>
+        </div>
+    </form>
+<?php endif; ?> 
 
 <script>
 document.getElementById("btnCadastrar").addEventListener("click", function() {
