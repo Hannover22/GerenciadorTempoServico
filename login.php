@@ -6,6 +6,10 @@ $erro = isset($_GET['error']) ? $_GET['error'] : "";
 $ok = isset($_GET['ok']) ? $_GET['ok'] : "";
 $logado = isset($_SESSION['tipo']);
 
+// Chave secreta para assinar o cookie. 
+// ATENÇÃO: Use uma chave longa, complexa e mantida em segredo.
+$SECRETE_KEY = "SuaChaveSecretaMuitoLongaEComplexaParaAssinatura123456"; 
+
 // Login
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['btnLogin'])) {
 
@@ -30,6 +34,26 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['btnLogin'])) {
             session_regenerate_id(true);
             $_SESSION['tipo'] = $row['cargo'];
             $_SESSION['usuario'] = $row['nome'];
+
+            // LÓGICA DE PERSISTÊNCIA (COOKIE SEM DB MODIFICADO)
+            if (isset($_POST['lembrar_de_mim'])) {
+                
+                $username = $row['nome'];
+                $password_hash = $row['senha']; // Hash da senha do banco
+
+                // Cria a assinatura (HMAC)
+                $signature = hash_hmac('sha256', $username . $password_hash, $SECRETE_KEY);
+
+                // O valor do cookie é: nome do usuário|assinatura
+                $cookie_value = $username . "|" . $signature;
+                
+                // Configura para expirar em 30 dias (tempo em segundos)
+                $expiracao = time() + (86400 * 30); 
+                
+                // Define o cookie no navegador (HttpOnly=true para segurança)
+                setcookie("auth_cred", $cookie_value, $expiracao, "/", "", false, true); 
+            }
+
             header("Location: RecebeServico.php");
             exit;
 
@@ -115,6 +139,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['btnFinalizarCadastro'
         <label>Senha:</label>
         <input type="password" name="senha"><br><br>
 
+        <label>
+            <input type="checkbox" name="lembrar_de_mim"> Lembrar de mim
+        </label><br><br>
+        
         <button type="submit" name="btnLogin">Entrar</button>
         <button type="button" id="btnCadastrar">Criar Conta</button>
 

@@ -1,10 +1,58 @@
 <?php
+session_start(); // MOVEMOS PARA O TOPO
 require_once "conecta.php";
-include "login.php";
+// include "login.php"; // LINHA REMOVIDA, POIS NÃO DEVE INCLUIR UM ARQUIVO DE FORMULÁRIO/LOGIN AQUI
+
+// Chave secreta para assinar o cookie. DEVE SER IDÊNTICA À CHAVE EM login.php!
+$SECRETE_KEY = "SuaChaveSecretaMuitoLongaEComplexaParaAssinatura123456"; 
+
+// --- LÓGICA DE AUTOLOGIN VIA COOKIE (SEM DB MODIFICADO) ---
+if (!isset($_SESSION['tipo']) && isset($_COOKIE['auth_cred']) && !empty($_COOKIE['auth_cred'])) {
+    
+    $parts = explode('|', $_COOKIE['auth_cred']);
+
+    if (count($parts) === 2) {
+        $username_from_cookie = $parts[0];
+        $signature_from_cookie = $parts[1];
+        
+        // 1. Busca o usuário no DB para obter o hash da senha e o cargo
+        $sql_check = "SELECT nome, senha, cargo FROM tb_usuarios WHERE nome = ? LIMIT 1";
+        $stmt_check = mysqli_prepare($con, $sql_check);
+        mysqli_stmt_bind_param($stmt_check, "s", $username_from_cookie);
+        mysqli_stmt_execute($stmt_check);
+        $result_check = mysqli_stmt_get_result($stmt_check);
+
+        if ($row_check = mysqli_fetch_assoc($result_check)) {
+            $current_password_hash = $row_check['senha'];
+
+            // 2. Gera uma nova assinatura com as credenciais atuais do banco
+            $expected_signature = hash_hmac('sha256', $username_from_cookie . $current_password_hash, $SECRETE_KEY);
+
+            // 3. Compara a assinatura do cookie com a assinatura esperada de forma segura
+            if (hash_equals($signature_from_cookie, $expected_signature)) {
+                // Assinatura válida: Renova a sessão e loga o usuário
+                session_regenerate_id(true);
+                $_SESSION['tipo'] = $row_check['cargo'];
+                $_SESSION['usuario'] = $row_check['nome'];
+            } else {
+                // Assinatura inválida (cookie adulterado ou senha alterada)
+                setcookie("auth_cred", "", time() - 3600, "/");
+            }
+        } else {
+             // Usuário não encontrado
+             setcookie("auth_cred", "", time() - 3600, "/");
+        }
+    } else {
+        // Formato de cookie inválido
+        setcookie("auth_cred", "", time() - 3600, "/");
+    }
+}
+// --- FIM DA LÓGICA DE AUTOLOGIN ---
+
 
 // se não estiver logado → volta para login
 if (!isset($_SESSION['tipo'])) {
-    header('locale:login.php');
+    header('Location: login.php'); // CORRIGIDO: de 'locale:' para 'Location:'
     exit;
 }
 
@@ -18,7 +66,7 @@ if($acessoAdmin){
                 
             if(!empty($_POST['datainicio']) && !empty($_POST['datafinal'])){
 
-                if($_POST['chk'] == 'a'){
+                if(isset($_POST['chk']) && $_POST['chk'] == 'a'){ // Adicionado isset()
                     
                     $nome = limpeza($_POST['txtnome']);
                     $profissao = limpeza($_POST['txtprofissao']);
@@ -31,19 +79,21 @@ if($acessoAdmin){
                     $datafObj = new DateTime($dataf);
                     $diff = $dataiObj->diff($datafObj);
                     $tempo = $diff->days;
+                    
+                    // Tratamento de faltas para CLT:
                     $faltas_clt =
-                        intval($_POST['lamspe']) +
-                        intval($_POST['f_medica']) +
-                        intval($_POST['a_medica']) +
-                        intval($_POST['f_medica_acompanhamento']) +
-                        intval($_POST['a_medica_acompanhamento']) +
-                        intval($_POST['l_saude']) +
-                        intval($_POST['int_particulares']) +
-                        intval($_POST['cargo_publico']) +
-                        intval($_POST['trat_familia']) +
-                        intval($_POST['p_suspensao']) +
-                        intval($_POST['justificada']) +
-                        intval($_POST['injustificada']);
+                        intval(isset($_POST['lamspe']) ? $_POST['lamspe'] : 0) +
+                        intval(isset($_POST['f_medica']) ? $_POST['f_medica'] : 0) +
+                        intval(isset($_POST['a_medica']) ? $_POST['a_medica'] : 0) +
+                        intval(isset($_POST['f_medica_acompanhamento']) ? $_POST['f_medica_acompanhamento'] : 0) +
+                        intval(isset($_POST['a_medica_acompanhamento']) ? $_POST['a_medica_acompanhamento'] : 0) +
+                        intval(isset($_POST['l_saude']) ? $_POST['l_saude'] : 0) +
+                        intval(isset($_POST['int_particulares']) ? $_POST['int_particulares'] : 0) +
+                        intval(isset($_POST['cargo_publico']) ? $_POST['cargo_publico'] : 0) +
+                        intval(isset($_POST['trat_familia']) ? $_POST['trat_familia'] : 0) +
+                        intval(isset($_POST['p_suspensao']) ? $_POST['p_suspensao'] : 0) +
+                        intval(isset($_POST['justificada']) ? $_POST['justificada'] : 0) +
+                        intval(isset($_POST['injustificada']) ? $_POST['injustificada'] : 0);
                     
                     $tempo = $tempo - $faltas_clt;
 
@@ -60,7 +110,7 @@ if($acessoAdmin){
                     header("Location: ".$_SERVER['PHP_SELF']."?ok=1");
                     exit;
                 }
-                else if($_POST['chk'] == 'b'){
+                else if(isset($_POST['chk']) && $_POST['chk'] == 'b'){ // Adicionado isset()
 
                     $nome = limpeza($_POST['txtnome']);
                     $profissao = limpeza($_POST['txtprofissao']);
@@ -74,18 +124,19 @@ if($acessoAdmin){
                     $diff = $dataiObj->diff($datafObj);
                     $tempo = $diff->days;
 
+                    // Tratamento de faltas para Autarquia:
                     $faltas_aut =
-                        intval($_POST['a_medico2']) +
-                        intval($_POST['l_saude2']) +
-                        intval($_POST['lc_saude3']) +
-                        intval($_POST['int_particulares2']) +
-                        intval($_POST['mandato_publico']) +
-                        intval($_POST['af_salarios']) +
-                        intval($_POST['pen_suspensao2']) +
-                        intval($_POST['justificada2']) +
-                        intval($_POST['justificada_comdesconto']) +
-                        intval($_POST['deliberacao']) +
-                        intval($_POST['justificadas2']);
+                        intval(isset($_POST['a_medico2']) ? $_POST['a_medico2'] : 0) +
+                        intval(isset($_POST['l_saude2']) ? $_POST['l_saude2'] : 0) +
+                        intval(isset($_POST['lc_saude3']) ? $_POST['lc_saude3'] : 0) +
+                        intval(isset($_POST['int_particulares2']) ? $_POST['int_particulares2'] : 0) +
+                        intval(isset($_POST['mandato_publico']) ? $_POST['mandato_publico'] : 0) +
+                        intval(isset($_POST['af_salarios']) ? $_POST['af_salarios'] : 0) +
+                        intval(isset($_POST['pen_suspensao2']) ? $_POST['pen_suspensao2'] : 0) +
+                        intval(isset($_POST['justificada2']) ? $_POST['justificada2'] : 0) +
+                        intval(isset($_POST['justificada_comdesconto']) ? $_POST['justificada_comdesconto'] : 0) +
+                        intval(isset($_POST['deliberacao']) ? $_POST['deliberacao'] : 0) +
+                        intval(isset($_POST['justificadas2']) ? $_POST['justificadas2'] : 0);
                     
                     $tempo = $tempo - $faltas_aut;
                     $datai_mysql = $dataiObj->format('Y-m-d H:i:s'); 
@@ -96,6 +147,11 @@ if($acessoAdmin){
                         
                     mysqli_stmt_bind_param($stmt, "ssdsssi", $nome, $profissao, $salario, $clt, $datai_mysql, $dataf_mysql, $tempo);
                     mysqli_stmt_execute($stmt);
+
+                    // EVITAR DUPLICAÇÃO AO ATUALIZAR A PÁGINA
+                    header("Location: ".$_SERVER['PHP_SELF']."?ok=1");
+                    exit;
+
                 }
                 else{
                     echo "Selecione se o funcionario é CLT ou de Autarquia";
@@ -200,9 +256,7 @@ if($acessoAdmin){
     <button type="button" id="btnAdd">Cadastrar faltas:</button>
 
     <div id="groupA" class="hidden group">
-    <!-- CAMPOS QUE VÃO APARECER DEPOIS -->
-
-        <p>
+    <p>
             <label>Abonadas:</label>
             <input type="number" name="abonadas" min="0" max="10000">
         </p>
@@ -332,7 +386,7 @@ if($acessoAdmin){
         <button type="submit">Logout</button>
     </form>
 <?php endif; ?>
-<?php if($_SESSION['tipo'] == "membro comum"): ?>
+<?php if(isset($_SESSION['tipo']) && $_SESSION['tipo'] == "membro comum"): ?>
     <div id="barchart_values" style="width: 900px; height: 400px;"></div>
     <form action="logout.php" method="post">
         <button type="submit">Logout</button>
