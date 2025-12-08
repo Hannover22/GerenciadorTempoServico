@@ -54,7 +54,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['btnLogin'])) {
                 setcookie("auth_cred", $cookie_value, $expiracao, "/", "", false, true); 
             }
 
-            header("Location: RecebeServico.php");
+            header("Location: Main.php");
             exit;
 
         } else {
